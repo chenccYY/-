@@ -1,0 +1,55 @@
+//chenchang 20143051	2016.3.7
+#include<iostream>
+using namespace std;
+int sui1()//此函数用于随机整数的选出
+{
+	int m=rand()%100;//模100，取0-99中的整数
+	return m;
+}
+char sui2()//此函数用于选出随机运算符
+{
+	int m=rand()%3;
+	if(m==0)return '+';
+	else if(m==1) return '-';
+	else if(m==2) return '*';
+	else if(m==3) return '/';
+}
+void main()
+{
+	for(int i=0;i<30;i++)
+	{
+		int zheng=rand()%2;
+		if(zheng==1)//整数计算
+		{
+			int shu1=sui1();
+			char fu1=sui2();
+			int shu2=sui1();
+			while(shu2==0||fu1=='/')//判断当为除法时，分母为零，重新选择一个分母
+			{
+				shu2=sui1();
+			}
+			cout<<"第 "<< i+1 <<" 个式子："<<shu1<<fu1<<shu2<<"="<<endl;
+		}
+		else {
+			int zi1=sui1();
+			int mu1=sui1();
+			while(mu1==0)//分母为零，重新选择一个分母
+			{
+				mu1=sui1();
+			}
+			char fu2=sui2();
+			////////////
+			int zi2=sui1();
+			int mu2=sui1();
+			while(mu2==0)//分母为零，重新选择一个分母
+			{
+				mu2=sui1();
+			}
+			while(zi2==0||fu2=='/')////判断当为除法时，第二个分数的分子为零，重新选择一个分子
+			{
+				zi2=sui1();
+			}
+			cout<<"第 "<< i+1 <<" 个式子："<<zi1<<"/"<<mu1<<fu2<<zi2<<"/"<<mu2<<"="<<endl;
+		}
+	}
+}
