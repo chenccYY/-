@@ -1,0 +1,207 @@
+1.确定题目的数量（for语句循环）
+2.随机判断是否有乘除法，随机判断乘除
+3.判断是否有括号（最多可以支持十个数参与计算）
+	1）随机选取运算个数
+	2）随机判断是否加入左括号
+	3）括号入栈，使用栈的输入
+4.随机数范围（%N）
+5.减法不能出现负数，如果运算符为减法，判断结果
+6.除法不能出现余数，如果运算符为除法，判断结果
+
+
+事后的总结、项目计划日志、时间记录日志、缺陷记录日志。
+1、题目避免重复；
+2、可定制（数量/打印方式）；
+3、可以控制下列参数: 
+ 是否有乘除法；
+ 是否有括号(最多可以支持十个数参与计算)；
+ 数值范围；
+ 加减有无负数；
+ 除法有无余数！
+设计思路：
+
+设计几个参数，再利用 if 判断语句来，用于实现条件三中的种种要求。用结构体来存放有括号的运算，再用数组来存放运算符。（简单写）
+
+设计代码：
+//chenchang 2016.3.16
+//sizeyunsuan gai 
+#include<iostream>
+using namespace std;
+int suiJiShu(int fan_wei)//生成随机数函数
+{
+	int shu=rand()%fan_wei;
+	return shu;
+}
+char yunSuanFu1()//有乘除
+{
+	int sui=rand()%4;
+	if(sui==0) return '+';
+	else if(sui==1) return '-';
+	else if(sui==2) return '*';
+	else return '/';
+}
+char yunSuanFu2()//只有加减
+{
+	int sui=rand()%2;
+	if(sui==0)	return'+';
+	else return '-';
+}
+
+struct kuo_hao_yun_suan//此结构体用于支持最多十个数参与运算
+{
+	int zhi;
+	int pan_duan_kuo_hao;//判断是否有括号，括号是左括号还是右括号
+	//0表示没有，1表示左括号，2表示右括号
+}shu[10];
+void main()
+{
+	int ti_mu_shu_liang=10;
+	cout<<"请输入题目的数量："<<endl;
+	cin>>ti_mu_shu_liang;
+	///////////////////////
+	int shu_zhi_fan_wei=100;
+	cout<<"请输入数值范围："<<endl;
+	cin>>shu_zhi_fan_wei;
+	//////////////////
+	int yun_suan_fa_ze=2;
+	cout<<"请确定是否需要乘除运算符，要：1，否：2"<<endl;
+	cin>>yun_suan_fa_ze;
+	////////////////
+	int kuo_hao_yes;
+	cout<<"请确定是否需要括号，要：1，否：2"<<endl;
+	cin>>kuo_hao_yes;
+	/////////////////////
+	int you_yu_shu=2;
+	if(kuo_hao_yes==2)
+	{
+		if(yun_suan_fa_ze==1)
+		{
+			cout<<"除法运算是否能有余数，是：1，否：2"<<endl;
+			cin>>you_yu_shu;
+		}
+	}
+	///////////////////
+	int fu_shu=2;
+	if(kuo_hao_yes==2)
+	{
+		cout<<"减法结果是否能出现负数，是：1，否：2"<<endl;
+		cin>>fu_shu;
+	}
+	////////
+	int shu_chu_ge_shi=1;
+	if(kuo_hao_yes==2)
+	{
+		cout<<"请选择输出格式：\n1.一行输出一个 \n2.一行输出两个 \n3.一行输出三个 \n4.一行输出四个 \n5.一行输出五个"<<endl;
+		cin>>shu_chu_ge_shi;
+	}
+	else 
+		cout<<"输出格式：一行输出一个 "<<endl;
+	///////////////////////////////////
+	for(int g=1;g<=ti_mu_shu_liang;g++)
+	{
+		if(kuo_hao_yes==1)//此部分写出的带括号
+		{
+			int chang_ji_shu=1;
+			int can_shu_ge_shu=rand()%9+2;
+			for(int i=0;i<can_shu_ge_shu;i++)//解决运算数
+			{
+				shu[i].zhi=suiJiShu(shu_zhi_fan_wei);
+				shu[i].pan_duan_kuo_hao=0;
+			}
+			char fu_hao[10];
+			if(yun_suan_fa_ze==1)//有乘除
+			{
+				for(int i=0;i<can_shu_ge_shu-1;i++)//解决运算符
+				{
+					fu_hao[i]=yunSuanFu1();
+					if(i>0)//从第二个运算符开始，判断当该运算符为‘*’或‘/‘时，是否前一个运算符为’+‘或’-‘，如果是，
+						//在随机判断是否将前面用括号括起来
+					{
+						if((fu_hao[i]=='*'||fu_hao[i]=='/')&&(fu_hao[i-1]=='+'||fu_hao[i-1]=='-'))
+						{
+							int kuo=rand()%2;//随机判断是否需要添加括号，0表示不需要，1表示需要
+							if(kuo==1)
+							{
+								shu[i-1].pan_duan_kuo_hao=1;
+								shu[i].pan_duan_kuo_hao=2;
+							}
+						}
+					}
+				}
+			}
+			else //此部分没有使用乘除法则
+			{
+				for(int i=0;i<can_shu_ge_shu-1;i++)
+				{
+					fu_hao[i]=yunSuanFu2();
+					if(i>0)
+					{
+						if(fu_hao[i-1]=='-'&&fu_hao[i]=='+')
+						{
+							int kuo=rand()%2;//随机判断是否需要添加括号，0表示不需要，1表示需要
+							if(kuo==1)
+							{
+								shu[i].pan_duan_kuo_hao=1;
+								shu[i+1].pan_duan_kuo_hao=2;
+							}
+						}
+					}
+				}
+			}
+			for(int i=0;i<can_shu_ge_shu;i++)
+			{
+				if(shu[i].pan_duan_kuo_hao==1)
+					cout<<"(";
+				cout<<shu[i].zhi;
+				if(shu[i].pan_duan_kuo_hao==2)
+					cout<<")";
+				if(i!=can_shu_ge_shu-1)
+					cout<<fu_hao[i];
+			}
+			cout<<"=\t";
+		}
+		///////////////////////////////////////////////
+		else //此部分没有括号
+		{
+			int shu1=suiJiShu(shu_zhi_fan_wei);
+			int shu2=suiJiShu(shu_zhi_fan_wei);
+			char yun_suan_fu;
+			if(yun_suan_fa_ze==1)//出现乘除法
+			{
+				yun_suan_fu=yunSuanFu1();
+				if(yun_suan_fu=='-'&&fu_shu==2)//如果是减法且不能有负数
+					while(shu1<shu2)//如果是减数大于被减数
+						shu1=suiJiShu(shu_zhi_fan_wei);//被减数重新随机选取
+				else if(yun_suan_fu=='/'&&you_yu_shu==2)//如果是除法且不能有余数
+				{
+					while(shu2==0)//除数不能为0
+						shu1=suiJiShu(shu_zhi_fan_wei);
+					while(shu1<shu2)//当除数大于被除数时
+						shu1=suiJiShu(shu_zhi_fan_wei);
+					while(shu1%shu2!=0)
+						shu2++;
+				}
+			}
+			else//不出现乘除
+			{
+				yun_suan_fu=yunSuanFu2();
+				if(yun_suan_fu=='-'&&fu_shu==2)//如果是减法且不能有负数
+					while(shu1<shu2)//如果是减数大于被减数
+						shu1=suiJiShu(shu_zhi_fan_wei);//被减数重新随机选取
+			}
+			cout<<shu1<<yun_suan_fu<<shu2<<"=\t";
+		}
+		if(g%shu_chu_ge_shi==0)
+			cout<<endl;
+	}
+}
+事后总结：
+这次编程的难点是括号哪里，因为参数个数不确定，括号的个数也不能确定，且括号都是成对出现的，
+而且要使括号有意义，所以我选择将括号这部分分成两大类，一类有乘除，一类没有乘除。有乘除，
+根据乘除运算符其前一个运算符是否是加减运算符，如果是，此时在随机判断是否添加括号，因为
+这时的括号是有意义的。没有乘除，根据减法运算符后一个运算符是否是加法运算符来判断，如果
+是，在随机判断是否加括号。
+
+弊端：
+在乘除运算中，如果连续出现加减运算符，此时加上括号是有意义的，而我写的程序默认是不加括号；
+在加减运算中，如果出现连续的减法，此时在中间加上括号是有意义的，而我的程序默认是不加括号。
