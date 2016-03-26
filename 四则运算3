@@ -1,0 +1,551 @@
+老师提出了新的要求：
+   1、学生写的程序必须能判定用户的输入答案是否正确， 
+ 例如程序输出：20 – 5 = ?用户输入15，那么程序就会反馈正确，然后继续出题。直	 到 30 道题目结束，程序最后告诉用户作对了几道题。
+   2、程序必须能处理四种运算的混合算式；
+     20 – 5 * 2 =？           正确答案是10.
+      20– 5 * 2 + 9 / 3 = ？   正确答案是13
+注意：
+    连续的减法和除法，应该遵守左结合的规定。
+    连续除法要打括号，否则会引起歧义
+设计思路：
+将程序分成两大部分：简单二元四则运算，复杂多元四则运算
+简单二元四则运算：
+简单二元四则运算中实现大部分的要求。
+复杂多元运算：
+定义结构体ComplexOperation，结构体中有两个整型，一个用于存储数，另一个用于判断括号，用结构体定义数组num[10]。定义数组fuhao[10]用于存储运算符，随机生成运算数个数，在随机生成运算符（数目比运算数少一）。使用if语句判断符号中是否出现连续的除法，如果是则将表示括号的整数改成相对应的数。在定义一个整型result保存结果，函数getResult（）返回结果。
+结果的得出，for（int i=0;i<运算数；i++）语句循环，循环体判断运算符是否除号还是乘号，将对应位置的运算数进行相应的运算，并将结果存储到第一个数所在的位置，然后将后面的数向前移一位，长度减一。在使用类似的循环计算加减。最后结果存储在数组的一号位置。
+Main：
+首先判断是哪种运算：简单还是复杂
+设定一个数组，存储用户每次输入的结果。用户输入时，判断用户输入的格式，格式不对，重新输入。
+设定循环30次，在每次循环中先输出运算式子，再让用户输入结果，将用户的结果与正确结果比较，对，则将计数的整数++。最后输出答对题目数
+代码：
+ErYuan.h
+#pragma once
+#include<iostream>
+using namespace std;
+class ErYuan
+{
+public:
+	ErYuan(void);
+	~ErYuan(void);
+	int setShu();
+	char setHu1();
+	char setHu2();
+	void YueShu(int a,int b);//化简分数
+	//int getResult();
+	void setSimple(int fenshu,int fushu,int chufa,int yushu);
+	void Display1();
+	void Display2();
+	int getYuFenZheng()
+	{
+		return yu_fen_zheng;
+	}
+	int getDaZi()
+	{
+		return da_zi;
+	}
+	int getYuMu()
+	{
+		return yu_mu;
+	}
+private:
+	
+	int shu1,shu2,shu3,shu4;//结果为整数，除法必须整除
+	char fu;
+	int zi,mu;
+	int yu_fen_zheng,da_zi,yu_mu;//yu_fen_zheng代表数据类型，0：整 1：分 2：余
+	//da_zi代表整数答案或分子，yu_mu代表余数或分母
+};
+
+ErYuan.cpp
+#include "ErYuan.h"
+#include<time.h>
+
+ErYuan::ErYuan(void)
+{
+}
+
+
+ErYuan::~ErYuan(void)
+{
+}
+int ErYuan::setShu()
+{
+	return rand()%100;
+}
+char ErYuan::setHu1()
+{
+	int m=rand()%4;
+	if(m==0)return'+';
+	else if(m==1)return'-';
+	else if(m==2)return '*';
+	else return '/';
+}
+char ErYuan::setHu2()
+{
+	int m=rand()%2;
+	if(m==0)return '+';
+	else return '-';
+}
+void ErYuan::Display1()/////////////////
+{
+	cout<<shu1<<fu<<shu2<<" ="<<endl;
+
+}
+void ErYuan::Display2()
+{
+	cout<<shu1<<"/"<<shu2<<"  "<<fu<<"  "<<shu3<<"/"<<shu4<<" ="<<endl;
+}
+void ErYuan::YueShu(int zi,int mu)
+{
+	bool jiaozheng=false;
+	if(zi<0)
+		jiaozheng=true;
+	if(jiaozheng==true)
+		zi=-zi;
+	if(zi%mu==0)//整除
+	{
+		yu_fen_zheng=0;//整数
+		da_zi=zi/mu;
+	}
+	else
+	{
+		int xiao=(zi<mu)?zi:mu;
+		int max=1;
+		for(int i=1;i<=xiao;i++)
+		{
+			if(zi%i==0&&mu%i==0)
+				max=i;
+		}
+		yu_fen_zheng=1;//分数
+		if(jiaozheng==true)
+			da_zi=-(zi/max);
+		else
+			da_zi=zi/max;
+		yu_mu=mu/max;
+	}
+}
+void ErYuan::setSimple(int fenshu,int fushu,int chufa,int yushu)
+{
+	if(fenshu==2)//没有分数
+	{
+		shu1=setShu();
+		shu2=setShu();
+		if(chufa==2)//没有除法
+		{
+			fu=ErYuan::setHu2();
+			if(fu=='-')
+			{
+				if(fushu==2)//不允许出现负数
+					if(shu1<shu2)
+					{
+						shu3=shu1;
+						shu1=shu2;
+						shu2=shu3;
+					}
+			}
+			switch(fu)
+			{
+			case('+') :da_zi=shu1+shu2;yu_fen_zheng=0;break;
+			case('-') :da_zi=shu1-shu2;yu_fen_zheng=0;break;
+			}
+		}
+		else //有除法
+		{
+			fu=ErYuan::setHu1();
+			if(fu=='-')
+			{
+				if(fushu==2)//不允许出现负数
+					if(shu1<shu2)
+					{
+						shu3=shu1;
+						shu1=shu2;
+						shu2=shu3;
+					}
+				da_zi=shu1-shu2;yu_fen_zheng=0;
+			}	
+			else if(fu=='/')
+			{
+				while(shu2==0)
+				{
+					shu2=ErYuan::setShu();
+				}
+				if(yushu==2)//不允许出现余数
+				{
+					if(shu1!=0)
+					{
+						shu1=(shu1>shu2)?shu1:shu2;
+						shu1+=(shu1%shu2);
+					}
+					da_zi=shu1/shu2;
+					yu_fen_zheng=0;
+				}
+				else //允许出现余数
+				{
+					if(shu1==0)
+					{
+						da_zi=0;
+						yu_fen_zheng=0;
+					}
+					else if(shu1%shu2==0)//恰好整除
+					{
+						da_zi=shu1/shu2;
+						yu_fen_zheng=0;
+					}
+					else //不能整除
+					{
+						yu_fen_zheng=2;//余数
+						da_zi=shu1/shu2;//整数部分
+						yu_mu=shu1%shu2;//余数部分
+					}
+				}
+			}
+			switch(fu)
+			{
+			case('+') :da_zi=shu1+shu2;yu_fen_zheng=0;break;
+			case('*') :da_zi=shu1*shu2;yu_fen_zheng=0;break;
+			}
+		}
+	}
+	else if(fenshu==1)//有分数
+	{
+		shu2=rand()%9+1;
+		shu1=rand()%shu2;//shu1为shu2的分子
+		shu4=rand()%9+1;
+		shu3=rand()%shu4;//shu3为shu4的分子
+		if(chufa==2)//没有乘除法
+		{
+			fu=ErYuan::setHu2();
+			if(fu=='+')
+			{
+				zi=shu1*shu4+shu2*shu3;
+				mu=shu2*shu4;
+				ErYuan::YueShu(zi,mu);
+			}
+			else if(fu=='-')//减法
+			{
+				zi=shu1*shu4-shu2*shu3;
+				mu=shu2*shu4;
+				ErYuan::YueShu(zi,mu);
+			}
+		}
+		else //有乘除
+		{
+			fu=ErYuan::setHu1();
+			if(fu=='+')
+			{
+				zi=shu1*shu4+shu2*shu3;
+				mu=shu2*shu4;
+				ErYuan::YueShu(zi,mu);
+			}
+			else if(fu=='-')//减法
+			{
+				zi=shu1*shu4-shu2*shu3;
+				mu=shu2*shu4;
+				ErYuan::YueShu(zi,mu);
+			}
+			else if(fu=='*')//乘法
+			{
+				zi=shu1*shu3;
+				mu=shu2*shu4;
+				ErYuan::YueShu(zi,mu);
+			}
+			else//除法
+			{
+				zi=shu1*shu4;
+				mu=shu3*shu2;
+				ErYuan::YueShu(zi,mu);
+			}
+		}
+	}
+}
+
+DuoYuan.h：
+#pragma once
+#include<iostream>
+using namespace std;
+class DuoYuan
+{
+public:
+	DuoYuan(void);
+	~DuoYuan(void);
+	void setAll();
+	int getResult();
+	void Display();
+private:
+	struct ComplexOperation
+	{
+		int num,kuohao;
+	}shu[10];
+	char fuhao[10];
+	int result;
+	int yun_suan_shu;
+};
+
+DuoYuan.cpp：
+#include "DuoYuan.h"
+
+
+DuoYuan::DuoYuan(void)
+{
+}
+
+
+DuoYuan::~DuoYuan(void)
+{
+}
+
+void DuoYuan::setAll()
+{
+	for(int i=0;i<10;i++)
+	{
+		shu[i].num=0;
+		shu[i].kuohao=0;	
+		fuhao[i]='0';
+	}
+	yun_suan_shu=rand()%9+2;
+	for(int i=0;i<yun_suan_shu;i++)
+	{
+		shu[i].num=rand()%10;
+	}
+	for(int i=0;i<yun_suan_shu-1;i++)
+	{
+		int sui=rand()%4;
+		if(sui==0) fuhao[i]='+';
+		else if(sui==1) fuhao[i]='-';
+		else if(sui==2) fuhao[i]='*';
+		else fuhao[i]='/';
+	}
+}
+void DuoYuan::Display()
+{
+	int count=0;
+	for(int i=0;i<yun_suan_shu;i++)
+	{
+		int j=i;
+		while(fuhao[i]=='/'&&i<yun_suan_shu)
+		{
+			count++;
+			i++;
+		}
+		if(count==1)
+		{
+			count=0;
+			continue; 
+		}
+		shu[j].kuohao=count;
+		for(j;j<i;j++)
+		{
+			shu[j+1].kuohao=-1;
+		}
+		count=0;
+	}
+	for(int i=0;i<yun_suan_shu;i++)
+	{
+		if(shu[i].kuohao!=0&&shu[i].kuohao!=-1)
+		{
+			while(shu[i].kuohao>0)
+			{
+				cout<<"(";
+				shu[i].kuohao--;
+			}
+		}
+		cout<<shu[i].num;
+		if(shu[i].kuohao==-1)
+			cout<<")";
+		if(i!=yun_suan_shu-1)
+			cout<<fuhao[i];
+	}
+	cout<<"=";//<<endl;
+}
+int DuoYuan::getResult()
+{
+	for(int i=0;i<yun_suan_shu-1;i++)
+	{
+		if(fuhao[i]=='*')
+		{
+			shu[i].num=shu[i].num*shu[i+1].num;
+			for(int j=i;j<yun_suan_shu-2;j++)
+			{
+				shu[j+1].num=shu[j+2].num;
+				fuhao[j]=fuhao[j+1];
+			}
+			yun_suan_shu--;
+			i--;
+		}
+		else if(fuhao[i]=='/')
+		{
+			shu[i].num=shu[i].num/shu[i+1].num;
+			for(int j=i;j<yun_suan_shu-2;j++)
+			{
+				shu[j+1].num=shu[j+2].num;
+				fuhao[j]=fuhao[j+1];
+			}
+			yun_suan_shu--;
+			i--;
+		}
+	}
+	if(yun_suan_shu!=1)
+	{
+		for(int i=0;i<yun_suan_shu-1;i++)
+		{
+			if(fuhao[i]=='-')
+			{
+				shu[i].num=shu[i].num-shu[i+1].num;
+				for(int j=i;j<yun_suan_shu-2;j++)
+				{
+					shu[j+1].num =shu[j+2].num;
+					fuhao[j]=fuhao[j+1];
+				}
+				yun_suan_shu--;
+				i--;
+			}
+			else if(fuhao[i]=='+')
+			{
+				shu[i].num=shu[i].num+shu[i+1].num;
+				for(int j=i;j<yun_suan_shu-2;j++)
+				{
+					shu[j+1].num =shu[j+2].num;
+					fuhao[j]=fuhao[j+1];
+				}
+				yun_suan_shu--;
+				i--;
+			}
+		}
+	}
+	result=shu[0].num;
+	return result;
+}
+
+main：
+//陈昌  2016.3.25 四则运算3 20143051
+#include"ErYuan.h"
+#include"DuoYuan.h"
+#include<string>
+//#include<stdlib.h>
+int getUser()
+{
+	int shuru=0;
+	bool is_number=false;
+	string str;
+	while(!is_number)
+	{
+		cin>>str;
+		//int wei=0;
+		for(int i=0;i<str.length();i++)
+		{
+			if((str[i]>='0'&&str[i]<='9'))
+			{
+				is_number=true;
+			}
+			else 
+			{
+				is_number=false;
+				cout<<"输入格式错误！请重新输入答案："<<endl;
+				break;
+			}
+		}
+	}
+	shuru=atoi(str.c_str());//将string强制转化为整型
+	return shuru;
+}
+int main()
+{
+	ErYuan er;
+	DuoYuan duo;
+	int user[30];
+	int leixing;
+	int fenshu=2,fushu=2,chufa=2,yushu=2,lie=1;
+	cout<<"题目类型，1：简单运算，2：复杂运算"<<endl;
+	cin>>leixing;
+	if(leixing==1)
+	{
+		cout<<"是否需要分数，1:是，2：否"<<endl;
+		cin>>fenshu;
+		if(fenshu==2)
+		{
+			cout<<"减法是否能出现负数，1：是，2：否"<<endl;
+			cin>>fushu;
+		}
+		cout<<"是否需要乘除法，1：是，2：否"<<endl;
+		cin>>chufa;
+		if(chufa==1&&fenshu==2)
+		{
+			cout<<"除法是否能有余数,1：是，2：否"<<endl;
+			cin>>yushu;
+		}
+	}
+	int zheng_que=0;
+	for(int i=0;i<6;i++)
+	{
+		if(leixing==1)
+		{
+			er.setSimple(fenshu,fushu,chufa,yushu);
+			if(fenshu==2)
+			{
+				er.Display1();
+			}
+			else if(fenshu==1)
+				er.Display2();
+			int yu_fen_zheng;
+			yu_fen_zheng=er.getYuFenZheng();
+			if(yu_fen_zheng==0)
+			{
+				cout<<"请输入答案:  ";
+				if(fenshu==2&&yushu==2)//只有当运算为简单运算且没有余数时才保存用户数据
+				{
+					user[i]=getUser();
+					if(user[i]==er.getDaZi())
+						zheng_que++;
+				}
+				else 
+				{
+					if(getUser()==er.getDaZi())
+						zheng_que++;
+				}
+			}
+			else if(yu_fen_zheng==2)
+			{
+				cout<<"请输入商:";
+				int shang;
+				shang=getUser();
+				cout<<"请输入余数:";
+				int yu;
+				yu=getUser();
+				if(shang==er.getDaZi()&&yu==er.getYuMu())
+					zheng_que++;
+			}
+			else //分数
+			{
+				cout<<"请输入分子：";
+				int zi;
+				zi=getUser();
+				cout<<"请输入分母:";
+				int mu=getUser();
+				if(zi==er.getDaZi()&&mu==er.getYuMu())
+					zheng_que++;
+			}
+		}
+		else
+		{
+			duo.setAll();
+			duo.Display();
+			if(getUser()==duo.getResult())
+			{
+				zheng_que++;
+			}
+		}
+	}
+	cout<<"正确做对题数： "<<zheng_que<<endl;
+	if(leixing==1&&fenshu==2&&yushu==2)
+	{
+		cout<<"用户输入的答案："<<endl;
+		for(int i=0;i<6;i++)
+		{
+			cout<<user[i]<<"\t";
+			if((i+1)%4==0)
+				cout<<endl;
+		}
+	}
+}
+
